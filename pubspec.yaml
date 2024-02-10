@@ -1,0 +1,26 @@
+name: flutter_html_muncher
+description: "Munch html page into flutter widgets"
+version: 0.0.1
+homepage: https://github.com/realth000/flutter_html_muncher
+repository: https://github.com/realth000/flutter_html_muncher
+issue_tracker: https://github.com/realth000/flutter_html_muncher/issues
+
+environment:
+  flutter: ">=1.17.0"
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  collection: ^1.18.0
+  flutter:
+    sdk: flutter
+  universal_html: ^2.2.4
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^5.1.0
+
+# The following section is specific to Flutter packages.
+flutter:
+
