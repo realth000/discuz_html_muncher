@@ -1,6 +1,5 @@
+import 'package:flutter_html_muncher/discuz_html_muncher.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:flutter_html_muncher/flutter_html_muncher.dart';
 
 void main() {
   test('adds one to input values', () {

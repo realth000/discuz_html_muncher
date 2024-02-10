@@ -1,9 +1,9 @@
-name: flutter_html_muncher
-description: "Munch html page into flutter widgets"
+name: discuz_html_muncher
+description: "Munch discuz html page into flutter widgets"
 version: 0.0.1
-homepage: https://github.com/realth000/flutter_html_muncher
-repository: https://github.com/realth000/flutter_html_muncher
-issue_tracker: https://github.com/realth000/flutter_html_muncher/issues
+homepage: https://github.com/realth000/discuz_html_muncher
+repository: https://github.com/realth000/discuz_html_muncher
+issue_tracker: https://github.com/realth000/discuz_html_muncher/issues
 
 environment:
   flutter: ">=1.17.0"
