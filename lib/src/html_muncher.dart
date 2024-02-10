@@ -134,7 +134,7 @@ class _MunchState {
 class Muncher {
   /// Constructor.
   Muncher({
-    required BuildContext context,
+    BuildContext? context,
     this.munchTagCallbackList = const [],
   }) : _context = context;
 
@@ -142,7 +142,7 @@ class Muncher {
   List<MunchTagCallback> munchTagCallbackList;
 
   /// Context to build widget when munching.
-  final BuildContext _context;
+  BuildContext? _context;
 
   /// Munch state to use when munching.
   final _MunchState _state = _MunchState();
@@ -253,7 +253,9 @@ class Muncher {
   /// widget.
   ///
   /// Main entry of this package.
-  Widget munchElement(uh.Element rootElement) {
+  Widget munchElement(BuildContext context, uh.Element rootElement) {
+    _context = context;
+
     // Alignment in this page requires a fixed max width that equals to website
     // page width.
     // Currently is 712.
@@ -261,7 +263,7 @@ class Muncher {
       constraints: const BoxConstraints(
         maxWidth: 712,
       ),
-      child: RichText(text: _munch(_context, rootElement)),
+      child: RichText(text: _munch(context, rootElement)),
     );
   }
 
@@ -310,7 +312,7 @@ class Muncher {
           }
 
           // Base text style.
-          var style = Theme.of(_context).textTheme.bodyMedium?.copyWith(
+          var style = Theme.of(_context!).textTheme.bodyMedium?.copyWith(
                 color: _state.colorStack.lastOrNull,
                 fontWeight: _state.bold ? FontWeight.w600 : null,
                 fontSize: _state.fontSizeStack.lastOrNull,
@@ -327,7 +329,7 @@ class Muncher {
             final u = _state.tapUrl!;
             recognizer = TapGestureRecognizer()
               ..onTap = () async {
-                await _urlLauncher?.call(_context, u);
+                await _urlLauncher?.call(_context!, u);
               };
             style = style?.copyWith(
               decoration: TextDecoration.underline,
@@ -357,8 +359,8 @@ class Muncher {
           // TODO: Handle <ul> and <li> marker
           // Parse according to element types.
           final span = switch (localName) {
-            'img' when _imageUrlGrepper(_context, node) != null =>
-              _imageBuilder(_context, _imageUrlGrepper(_context, node)!),
+            'img' when _imageUrlGrepper(_context!, node) != null =>
+              _imageBuilder(_context!, _imageUrlGrepper(_context!, node)!),
             'br' => const TextSpan(text: '\n'),
             'font' => _buildFont(node),
             'strong' => _buildStrong(node),
@@ -385,7 +387,7 @@ class Muncher {
             'ul' ||
             'dd' ||
             'pre' =>
-              _munch(_context, node),
+              _munch(_context!, node),
             String() => null,
           };
           return span;
@@ -402,7 +404,7 @@ class Muncher {
     // Setup font size.
     final hasFontSize = _tryPushFontSize(element);
     // Munch!
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
 
     // Restore color
     if (hasColor) {
@@ -419,21 +421,21 @@ class Muncher {
 
   InlineSpan _buildStrong(uh.Element element) {
     _state.bold = true;
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.bold = false;
     return ret;
   }
 
   InlineSpan _buildUnderline(uh.Element element) {
     _state.underline = true;
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.underline = false;
     return ret;
   }
 
   InlineSpan _buildLineThrough(uh.Element element) {
     _state.lineThrough = true;
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.lineThrough = false;
     return ret;
   }
@@ -462,7 +464,7 @@ class Muncher {
       _state.textAlign = align;
     }
 
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
 
     late final InlineSpan ret2;
 
@@ -501,7 +503,7 @@ class Muncher {
         .map((e) => MapEntry(e.$1, e.$2))
         .toList();
     if (styleEntries == null) {
-      final ret = _munch(_context, element);
+      final ret = _munch(_context!, element);
       return TextSpan(children: [ret, const TextSpan(text: '\n')]);
     }
 
@@ -511,7 +513,7 @@ class Muncher {
     final fontSize = styleMap['font-size'];
     final hasFontSize = _tryPushFontSize(element, fontSizeString: fontSize);
 
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
 
     if (hasColor) {
       _state.colorStack.removeLast();
@@ -535,7 +537,7 @@ class Muncher {
     // and restore munch state to avoid potential issued about "styles inside
     // quoted blocks  affects outside main content".
     _state.save();
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.restore();
     return TextSpan(
       children: [
@@ -579,7 +581,7 @@ class Muncher {
             .firstWhereOrNull((e) => element.classes.contains(e.key))
             ?.value ??
         _munch;
-    final ret = executor(_context, element);
+    final ret = executor(_context!, element);
     if (!alreadyInDiv) {
       _state.inDiv = false;
     }
@@ -589,30 +591,30 @@ class Muncher {
   InlineSpan _buildA(uh.Element element) {
     if (element.attributes.containsKey('href')) {
       _state.tapUrl = element.attributes['href'];
-      final ret = _munch(_context, element);
+      final ret = _munch(_context!, element);
       _state.tapUrl = null;
       return ret;
     }
-    return _munch(_context, element);
+    return _munch(_context!, element);
   }
 
   InlineSpan _buildTr(uh.Element element) {
     _state.trimAll = true;
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.trimAll = false;
     return TextSpan(children: [ret, const TextSpan(text: '\n')]);
   }
 
   InlineSpan _buildTd(uh.Element element) {
     _state.trimAll = true;
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.trimAll = false;
     return TextSpan(children: [ret, const TextSpan(text: ' ')]);
   }
 
   InlineSpan _buildH1(uh.Element element) {
     _state.fontSizeStack.add(FontSize.size6.value());
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.fontSizeStack.removeLast();
     return TextSpan(
       children: [
@@ -625,7 +627,7 @@ class Muncher {
 
   InlineSpan _buildH2(uh.Element element) {
     _state.fontSizeStack.add(FontSize.size5.value());
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.fontSizeStack.removeLast();
     return TextSpan(
       children: [
@@ -638,7 +640,7 @@ class Muncher {
 
   InlineSpan _buildH3(uh.Element element) {
     _state.fontSizeStack.add(FontSize.size4.value());
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.fontSizeStack.removeLast();
     return TextSpan(
       children: [
@@ -651,7 +653,7 @@ class Muncher {
 
   InlineSpan _buildH4(uh.Element element) {
     _state.fontSizeStack.add(FontSize.size3.value());
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.fontSizeStack.removeLast();
     return TextSpan(
       children: [
@@ -663,7 +665,7 @@ class Muncher {
   }
 
   InlineSpan _buildLi(uh.Element element) {
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     return TextSpan(
       children: [
         WidgetSpan(
@@ -681,11 +683,11 @@ class Muncher {
   /// <code>xxx</code> tags. Mainly for github.com
   InlineSpan _buildCode(uh.Element element) {
     _state.fontSizeStack.add(FontSize.size2.value());
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     _state.fontSizeStack.removeLast();
     return WidgetSpan(
       child: Card(
-        color: Theme.of(_context).colorScheme.onSecondary,
+        color: Theme.of(_context!).colorScheme.onSecondary,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(5)),
         ),
@@ -700,11 +702,11 @@ class Muncher {
     if (element.id.startsWith('ratelog_')) {
       return const TextSpan();
     }
-    return _munch(_context, element);
+    return _munch(_context!, element);
   }
 
   InlineSpan _buildB(uh.Element element) {
-    final ret = _munch(_context, element);
+    final ret = _munch(_context!, element);
     return TextSpan(children: [ret, const TextSpan(text: '\n')]);
   }
 
